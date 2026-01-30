@@ -1,0 +1,31 @@
+name: Netdata Monitoring CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  netdata-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: chmod +x setup.sh test_dashboard.sh cleanup.sh
+
+      - name: Install Netdata
+        run: sudo ./setup.sh
+
+      - name: Verify Netdata service
+        run: |
+          systemctl status netdata
+          ss -tulnp | grep 19999
+
+      - name: Test monitoring dashboard (CPU load)
+        run: sudo ./test_dashboard.sh
+
+      - name: Cleanup Netdata
+        run: sudo ./cleanup.sh
